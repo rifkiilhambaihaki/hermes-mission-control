@@ -35,7 +35,14 @@ export const DEMO_OBSERVATIONS: ObservationAggregate = {
       },
     }),
     slot("HERMES_PROFILE", {
-      current: { profile_count: 2, current_profile_count: 1 },
+      availability: "UNKNOWN",
+      completeness: "UNKNOWN",
+      freshness: "UNKNOWN",
+      review_status: "REVIEW_REQUIRED",
+      confidence_level: "NONE",
+      observation_timestamp: null,
+      current: null,
+      error_code: "INTEGRATION_PENDING",
     }),
     slot("HERMES_GATEWAY", {
       completeness: "PARTIAL",
@@ -58,12 +65,12 @@ export const DEMO_OBSERVATIONS: ObservationAggregate = {
     slot("ACCOUNTING_V2", {
       current: {
         summary: {
-          income_idr: 8_500_000,
-          expense_idr: 2_665_842,
-          total_cash_outflow_idr: 2_665_842,
-          operational_surplus_idr: 5_834_158,
-          net_cash_surplus_idr: 5_834_158,
-          transaction_count: 38,
+          income_idr: 12_000_000,
+          expense_idr: 3_250_000,
+          total_cash_outflow_idr: 3_500_000,
+          operational_surplus_idr: 8_750_000,
+          net_cash_surplus_idr: 8_500_000,
+          transaction_count: 42,
         },
       },
     }),
@@ -76,24 +83,26 @@ export const DEMO_OBSERVATIONS: ObservationAggregate = {
       observation_timestamp: "2030-01-12T08:00:00.000Z",
       current: {
         summary: {
-          quality_issue_count: 2,
-          unresolved_mapping_count: 1,
+          quality_issue_count: 5,
+          unresolved_mapping_count: 2,
           incomplete_evidence_count: 1,
-          external_metadata_stale_count: 3,
-          source_conflict_count: 0,
+          external_metadata_stale_count: 4,
+          source_conflict_count: 1,
         },
       },
       error_code: "SNAPSHOT_STALE",
     }),
     slot("SUBMISSION_TRACKER", {
-      availability: "UNKNOWN",
-      completeness: "UNKNOWN",
-      freshness: "UNKNOWN",
-      review_status: "REVIEW_REQUIRED",
-      confidence_level: "NONE",
-      observation_timestamp: null,
-      current: null,
-      error_code: "INTEGRATION_PENDING",
+      current: {
+        summary: {
+          total_count: 12,
+          active_count: 4,
+          revision_requested_count: 2,
+          accepted_count: 5,
+          rejected_count: 1,
+          no_next_action_count: 0,
+        },
+      },
     }),
   ],
 };

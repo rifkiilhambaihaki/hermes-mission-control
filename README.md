@@ -28,7 +28,19 @@ The result is a deliberately conservative dashboard:
 
 ## Preview
 
-Run the loopback-only synthetic demo from [Quick start](#quick-start). It displays the complete seven-slot dashboard with a permanent **DEMO DATA** label and does not read Hermes or production files. A rendered screenshot is intentionally not checked in until it can be generated and reviewed from the actual demo build.
+### Dashboard Overview
+
+![Hermes Mission Control Dashboard Overview](docs/images/hermes-mission-control-overview.png)
+
+The dashboard brings together Hermes runtime observations and domain-specific operational snapshots in one read-only view.
+
+### Source-by-Source Evidence
+
+![Hermes Mission Control Source-by-Source Evidence](docs/images/hermes-mission-control-observations.png)
+
+Mission Control preserves availability, freshness, completeness, confidence, and review requirements according to the evidence available for each source.
+
+> **Synthetic data disclosure:** All screenshots use synthetic demonstration data. No personal financial information, private records, credentials, or production observations are included.
 
 ## Features
 

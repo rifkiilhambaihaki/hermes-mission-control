@@ -80,11 +80,14 @@ describe("Mission Control dashboard", () => {
 
     await screen.findByRole("heading", { name: "System overview" });
     const staleCard = document.querySelector('.domain-card[data-source="BANK_JOURNAL"] .status-stale');
-    const unknownCard = document.querySelector('.domain-card[data-source="SUBMISSION_TRACKER"] .status-unknown');
+    const unknownCard = document.querySelector('.metric-card[data-source="HERMES_PROFILE"] .status-unknown');
     expect(staleCard?.textContent).toBe("Stale");
     expect(unknownCard?.textContent).toBe("Unknown");
     expect(unknownCard?.classList.contains("status-available")).toBe(false);
     expect(screen.getByText("Awaiting Integration")).toBeTruthy();
+    const submissionCard = document.querySelector('.domain-card[data-source="SUBMISSION_TRACKER"]');
+    expect(submissionCard?.textContent).toContain("Active submissions4");
+    expect(submissionCard?.textContent).toContain("Total12");
   });
 
   it("shows Gateway process proof while preserving service-manager uncertainty", async () => {
@@ -126,8 +129,9 @@ describe("Mission Control dashboard", () => {
     render(<App loader={async () => data} />);
 
     await screen.findByRole("heading", { name: "Operational snapshots" });
-    expect(screen.getAllByText("Awaiting Integration")).toHaveLength(3);
-    expect(screen.getAllByText("No production sample data substituted.")).toHaveLength(3);
+    const domainCards = [...document.querySelectorAll(".domain-card")];
+    expect(domainCards.filter((card) => card.textContent?.includes("Awaiting Integration"))).toHaveLength(3);
+    expect(domainCards.filter((card) => card.textContent?.includes("No production sample data substituted."))).toHaveLength(3);
   });
 
   it("shows an all-sources-unavailable state without collapsing cards", async () => {
@@ -270,9 +274,9 @@ describe("Mission Control dashboard", () => {
     secretBearing.token = "synthetic-secret-canary";
     expect(() => parseObservationAggregate(secretBearing)).toThrowError(ObservationApiError);
 
-    const profile = fixture();
-    Object.assign(profile.observations[1]?.current ?? {}, { profile_name: "synthetic-private-profile" });
-    expect(() => parseObservationAggregate(profile)).toThrowError(ObservationApiError);
+    const extraPrivateField = fixture();
+    Object.assign(extraPrivateField.observations[0]?.current ?? {}, { profile_name: "synthetic-private-profile" });
+    expect(() => parseObservationAggregate(extraPrivateField)).toThrowError(ObservationApiError);
   });
 
   it("rejects observation metadata/current combinations that violate canonical invariants", () => {

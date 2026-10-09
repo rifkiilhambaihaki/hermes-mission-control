@@ -8,6 +8,10 @@ const forbiddenExtensions = new Set([
   ".bak", ".backup", ".db", ".dump", ".key", ".log", ".p12", ".pem", ".pfx", ".sqlite", ".sqlite3",
 ]);
 const forbiddenNames = new Set([".env", "id_rsa", "id_ed25519", "credentials.json"]);
+const allowedBinaryFiles = new Set([
+  "docs/images/hermes-mission-control-observations.png",
+  "docs/images/hermes-mission-control-overview.png",
+]);
 const knownPrivateMarkers = [
   "/home/hermes",
   "1177486604",
@@ -54,7 +58,7 @@ async function walk(directory) {
     if (stat.size > 1_048_576) findings.push(`${rel}: file exceeds 1 MiB review limit`);
     const data = await readFile(path);
     if (data.includes(0)) {
-      findings.push(`${rel}: binary file is not allowlisted`);
+      if (!allowedBinaryFiles.has(rel)) findings.push(`${rel}: binary file is not allowlisted`);
       continue;
     }
     const text = data.toString("utf8");
