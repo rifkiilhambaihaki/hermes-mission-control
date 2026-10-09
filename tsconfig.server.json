@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "src",
+    "outDir": "dist/server",
+    "declaration": true,
+    "sourceMap": true,
+    "types": ["node"]
+  },
+  "include": [
+    "src/bootstrap/**/*.ts",
+    "src/domain/**/*.ts",
+    "src/application/**/*.ts",
+    "src/adapters/**/*.ts",
+    "src/infrastructure/**/*.ts",
+    "src/security/**/*.ts",
+    "src/http/**/*.ts"
+  ],
+  "exclude": ["src/web/**", "**/*.test.ts", "**/*.test.tsx"]
+}

@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mission-control.local/schemas/accounting_v2.snapshot.schema.json",
+  "title": "Accounting V2 Sanitized Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source",
+    "generated_at",
+    "observed_at",
+    "reporting_period",
+    "snapshot_status",
+    "review_status",
+    "currency",
+    "unit",
+    "data"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "source": { "const": "ACCOUNTING_V2" },
+    "generated_at": { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" },
+    "observed_at": { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" },
+    "reporting_period": { "$ref": "common.snapshot.defs.schema.json#/$defs/reportingPeriod" },
+    "snapshot_status": { "$ref": "common.snapshot.defs.schema.json#/$defs/snapshotStatus" },
+    "review_status": { "$ref": "common.snapshot.defs.schema.json#/$defs/reviewStatus" },
+    "currency": { "const": "IDR" },
+    "unit": { "const": "RUPIAH" },
+    "data": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/accountingData" }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "snapshot_status": { "const": "UNKNOWN" } }, "required": ["snapshot_status"] },
+      "then": { "properties": { "data": { "type": "null" } } }
+    },
+    {
+      "if": { "properties": { "snapshot_status": { "enum": ["AVAILABLE", "EMPTY"] } }, "required": ["snapshot_status"] },
+      "then": { "properties": { "data": { "$ref": "#/$defs/accountingData" } } }
+    }
+  ],
+  "$defs": {
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "income_idr",
+        "expense_idr",
+        "total_cash_outflow_idr",
+        "operational_surplus_idr",
+        "net_cash_surplus_idr",
+        "transaction_count"
+      ],
+      "properties": {
+        "income_idr": { "$ref": "common.snapshot.defs.schema.json#/$defs/amountIdr" },
+        "expense_idr": { "$ref": "common.snapshot.defs.schema.json#/$defs/amountIdr" },
+        "total_cash_outflow_idr": { "$ref": "common.snapshot.defs.schema.json#/$defs/amountIdr" },
+        "operational_surplus_idr": { "$ref": "common.snapshot.defs.schema.json#/$defs/safeInteger" },
+        "net_cash_surplus_idr": { "$ref": "common.snapshot.defs.schema.json#/$defs/safeInteger" },
+        "transaction_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" }
+      }
+    },
+    "threshold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "threshold_ref",
+        "basis",
+        "limit_idr",
+        "observed_idr",
+        "progress_basis_points",
+        "reached"
+      ],
+      "properties": {
+        "threshold_ref": { "type": "string", "pattern": "^[A-Z0-9][A-Z0-9_-]{0,63}$" },
+        "basis": { "type": "string", "enum": ["INCOME", "EXPENSE"] },
+        "limit_idr": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "observed_idr": { "$ref": "common.snapshot.defs.schema.json#/$defs/amountIdr" },
+        "progress_basis_points": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" },
+        "reached": { "type": "boolean" }
+      }
+    },
+    "assetSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_ref",
+        "period",
+        "due_at",
+        "grace_until",
+        "captured_at",
+        "state",
+        "captured_late"
+      ],
+      "properties": {
+        "asset_ref": { "type": "string", "pattern": "^[A-Z0-9][A-Z0-9_-]{0,63}$" },
+        "period": { "$ref": "common.snapshot.defs.schema.json#/$defs/yearMonth" },
+        "due_at": { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" },
+        "grace_until": { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" },
+        "captured_at": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" }
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "CURRENT_PERIOD_NOT_DUE",
+            "CURRENT_PERIOD_DUE",
+            "CURRENT_PERIOD_CAPTURED",
+            "OVERDUE",
+            "UNKNOWN"
+          ]
+        },
+        "captured_late": { "type": "boolean" }
+      }
+    },
+    "assetIntegrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["historical_missing_period_count", "historical_missing_periods"],
+      "properties": {
+        "historical_missing_period_count": {
+          "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger"
+        },
+        "historical_missing_periods": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "common.snapshot.defs.schema.json#/$defs/yearMonth" }
+        }
+      }
+    },
+    "categoryItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category_ref", "amount_idr", "transaction_count"],
+      "properties": {
+        "category_ref": { "type": "string", "pattern": "^[A-Z0-9][A-Z0-9_-]{0,63}$" },
+        "amount_idr": { "$ref": "common.snapshot.defs.schema.json#/$defs/amountIdr" },
+        "transaction_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" }
+      }
+    },
+    "categoryDetails": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "common.snapshot.defs.schema.json#/$defs/detailWindow" },
+        {
+          "type": "object",
+          "required": ["items"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/categoryItem" }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "accountingData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary",
+        "thresholds",
+        "asset_snapshots",
+        "asset_integrity",
+        "category_details"
+      ],
+      "properties": {
+        "summary": { "$ref": "#/$defs/summary" },
+        "thresholds": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/threshold" }
+        },
+        "asset_snapshots": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/assetSnapshot" }
+        },
+        "asset_integrity": { "$ref": "#/$defs/assetIntegrity" },
+        "category_details": { "$ref": "#/$defs/categoryDetails" }
+      }
+    }
+  }
+}

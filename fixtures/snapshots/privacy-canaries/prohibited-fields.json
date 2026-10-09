@@ -1,0 +1,17 @@
+{
+  "api_key": "FAKE_API_KEY_NOT_VALID_12345",
+  "token": "FAKE_TOKEN_NOT_VALID_67890",
+  "OPENAI_API_KEY": "FAKE_DOTENV_VALUE_NOT_VALID",
+  "telegram_chat_id": "-1000000000000",
+  "transaction_description": "Synthetic private purchase description",
+  "merchant": "Fictional Merchant Canary",
+  "account_number": "0000000000000000",
+  "receipt_filename": "fake-receipt-canary.jpg",
+  "manuscript_text": "Synthetic manuscript body that must never cross the boundary.",
+  "reviewer_identity": "Dr Fictional Reviewer",
+  "editorial_correspondence": "Synthetic editorial message content.",
+  "evidence_url": "https://invalid.example.test/private-evidence",
+  "filesystem_path": "/synthetic/private/path/not-real",
+  "raw_prompt": "Synthetic raw prompt that must be rejected.",
+  "stderr": "Synthetic command failure output that must be rejected."
+}

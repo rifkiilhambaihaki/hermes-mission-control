@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mission-control.local/schemas/bank_journal_quality.snapshot.schema.json",
+  "title": "Bank Journal Quality Sanitized Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source",
+    "generated_at",
+    "observed_at",
+    "reporting_period",
+    "snapshot_status",
+    "review_status",
+    "data"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "source": { "const": "BANK_JOURNAL_QUALITY" },
+    "generated_at": { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" },
+    "observed_at": { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" },
+    "reporting_period": { "$ref": "common.snapshot.defs.schema.json#/$defs/reportingPeriod" },
+    "snapshot_status": { "$ref": "common.snapshot.defs.schema.json#/$defs/snapshotStatus" },
+    "review_status": { "$ref": "common.snapshot.defs.schema.json#/$defs/reviewStatus" },
+    "data": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/bankJournalData" }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "snapshot_status": { "const": "UNKNOWN" } }, "required": ["snapshot_status"] },
+      "then": { "properties": { "data": { "type": "null" } } }
+    },
+    {
+      "if": { "properties": { "snapshot_status": { "enum": ["AVAILABLE", "EMPTY"] } }, "required": ["snapshot_status"] },
+      "then": { "properties": { "data": { "$ref": "#/$defs/bankJournalData" } } }
+    }
+  ],
+  "$defs": {
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quality_issue_count",
+        "unresolved_mapping_count",
+        "incomplete_evidence_count",
+        "external_metadata_stale_count",
+        "source_conflict_count"
+      ],
+      "properties": {
+        "quality_issue_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" },
+        "unresolved_mapping_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" },
+        "incomplete_evidence_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" },
+        "external_metadata_stale_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" },
+        "source_conflict_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" }
+      }
+    },
+    "qualityIssue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "paper_ref",
+        "subject_ref",
+        "issue_code",
+        "authority",
+        "detected_at",
+        "external_metadata_observed_at"
+      ],
+      "properties": {
+        "paper_ref": { "type": "string", "pattern": "^PAPER-[A-Z0-9_-]{1,58}$" },
+        "subject_ref": { "type": "string", "pattern": "^[A-Z0-9][A-Z0-9_-]{0,63}$" },
+        "issue_code": {
+          "type": "string",
+          "enum": [
+            "UNRESOLVED_MAPPING",
+            "INCOMPLETE_EVIDENCE",
+            "EXTERNAL_METADATA_STALE",
+            "SOURCE_CONFLICT"
+          ]
+        },
+        "authority": {
+          "type": "string",
+          "enum": ["JOURNAL_KB", "SUBMISSION_HISTORY", "PAPER_TRACKER"]
+        },
+        "detected_at": { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" },
+        "external_metadata_observed_at": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" }
+          ]
+        }
+      }
+    },
+    "issueDetails": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "common.snapshot.defs.schema.json#/$defs/detailWindow" },
+        {
+          "type": "object",
+          "required": ["items"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/qualityIssue" }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "bankJournalData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "issue_details"],
+      "properties": {
+        "summary": { "$ref": "#/$defs/summary" },
+        "issue_details": { "$ref": "#/$defs/issueDetails" }
+      }
+    }
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mission-control.local/schemas/common.snapshot.defs.schema.json",
+  "title": "Mission Control Snapshot Common Definitions",
+  "$defs": {
+    "snapshotStatus": {
+      "type": "string",
+      "enum": ["AVAILABLE", "EMPTY", "UNKNOWN"]
+    },
+    "reviewStatus": {
+      "type": "string",
+      "enum": ["NONE", "REVIEW_REQUIRED"]
+    },
+    "isoTimestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "yearMonth": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+    },
+    "safeInteger": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "nonNegativeSafeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "amountIdr": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991,
+      "description": "Whole Indonesian rupiah. 202555 means Rp202.555; no decimal scaling."
+    },
+    "reportingPeriod": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["month", "timezone", "starts_at", "ends_at_exclusive"],
+      "properties": {
+        "month": { "$ref": "#/$defs/yearMonth" },
+        "timezone": { "const": "Asia/Jakarta" },
+        "starts_at": { "$ref": "#/$defs/isoTimestamp" },
+        "ends_at_exclusive": { "$ref": "#/$defs/isoTimestamp" }
+      }
+    },
+    "detailWindow": {
+      "type": "object",
+      "required": ["included_count", "total_count", "truncated"],
+      "properties": {
+        "included_count": { "$ref": "#/$defs/nonNegativeSafeInteger" },
+        "total_count": { "$ref": "#/$defs/nonNegativeSafeInteger" },
+        "truncated": { "type": "boolean" }
+      }
+    },
+    "snapshotHeader": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "source",
+        "generated_at",
+        "observed_at",
+        "reporting_period",
+        "snapshot_status",
+        "review_status",
+        "data"
+      ],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "source": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "generated_at": { "$ref": "#/$defs/isoTimestamp" },
+        "observed_at": { "$ref": "#/$defs/isoTimestamp" },
+        "reporting_period": { "$ref": "#/$defs/reportingPeriod" },
+        "snapshot_status": { "$ref": "#/$defs/snapshotStatus" },
+        "review_status": { "$ref": "#/$defs/reviewStatus" },
+        "data": {}
+      }
+    }
+  }
+}

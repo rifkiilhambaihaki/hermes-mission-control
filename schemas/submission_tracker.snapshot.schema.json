@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mission-control.local/schemas/submission_tracker.snapshot.schema.json",
+  "title": "Submission Tracker Sanitized Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source",
+    "generated_at",
+    "observed_at",
+    "reporting_period",
+    "snapshot_status",
+    "review_status",
+    "data"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "source": { "const": "SUBMISSION_TRACKER" },
+    "generated_at": { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" },
+    "observed_at": { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" },
+    "reporting_period": { "$ref": "common.snapshot.defs.schema.json#/$defs/reportingPeriod" },
+    "snapshot_status": { "$ref": "common.snapshot.defs.schema.json#/$defs/snapshotStatus" },
+    "review_status": { "$ref": "common.snapshot.defs.schema.json#/$defs/reviewStatus" },
+    "data": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/submissionData" }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "snapshot_status": { "const": "UNKNOWN" } }, "required": ["snapshot_status"] },
+      "then": { "properties": { "data": { "type": "null" } } }
+    },
+    {
+      "if": { "properties": { "snapshot_status": { "enum": ["AVAILABLE", "EMPTY"] } }, "required": ["snapshot_status"] },
+      "then": { "properties": { "data": { "$ref": "#/$defs/submissionData" } } }
+    }
+  ],
+  "$defs": {
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_count",
+        "active_count",
+        "revision_requested_count",
+        "accepted_count",
+        "rejected_count",
+        "no_next_action_count"
+      ],
+      "properties": {
+        "total_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" },
+        "active_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" },
+        "revision_requested_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" },
+        "accepted_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" },
+        "rejected_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" },
+        "no_next_action_count": { "$ref": "common.snapshot.defs.schema.json#/$defs/nonNegativeSafeInteger" }
+      }
+    },
+    "revisionDeadline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["due_at", "source"],
+      "properties": {
+        "due_at": { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" },
+        "source": {
+          "type": "string",
+          "enum": ["EDITORIAL_NOTICE", "SUBMISSION_SYSTEM", "USER_CONFIRMED"]
+        }
+      }
+    },
+    "nextAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "due_at"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["AWAIT_DECISION", "SUBMIT_REVISION", "FOLLOW_UP"]
+        },
+        "due_at": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" }
+          ]
+        }
+      }
+    },
+    "paper": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "paper_ref",
+        "recorded_status",
+        "authority",
+        "evidence_completeness",
+        "submitted_at",
+        "decision_at",
+        "revision_deadline",
+        "next_action"
+      ],
+      "properties": {
+        "paper_ref": { "type": "string", "pattern": "^PAPER-[A-Z0-9_-]{1,58}$" },
+        "recorded_status": {
+          "type": "string",
+          "enum": ["ACTIVE", "REVISION_REQUESTED", "ACCEPTED", "REJECTED"]
+        },
+        "authority": {
+          "type": "string",
+          "enum": ["SUBMISSION_HISTORY", "PAPER_TRACKER"]
+        },
+        "evidence_completeness": {
+          "type": "string",
+          "enum": ["COMPLETE", "MISSING"]
+        },
+        "submitted_at": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" }
+          ]
+        },
+        "decision_at": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.snapshot.defs.schema.json#/$defs/isoTimestamp" }
+          ]
+        },
+        "revision_deadline": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/revisionDeadline" }
+          ]
+        },
+        "next_action": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/nextAction" }
+          ]
+        }
+      }
+    },
+    "paperDetails": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "common.snapshot.defs.schema.json#/$defs/detailWindow" },
+        {
+          "type": "object",
+          "required": ["items"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/paper" }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "submissionData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "paper_details"],
+      "properties": {
+        "summary": { "$ref": "#/$defs/summary" },
+        "paper_details": { "$ref": "#/$defs/paperDetails" }
+      }
+    }
+  }
+}
